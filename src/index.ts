@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import mbaRoutes from './routes/mbaRoutes';
 import syncDatabase from './models/index';
@@ -7,6 +8,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
+
+app.use(cors());
 
 // Middleware
 app.use(express.json());
