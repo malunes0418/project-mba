@@ -4,7 +4,7 @@ import { protect } from '../middleware/authMiddleware'; // Import the protect mi
 
 const router = express.Router();
 
-router.get('/VRTransactions', async (req: Request, res: Response) => {
+router.get('/VRTransactions', protect, async (req: Request, res: Response) => {
   try {
     await retrieveVRTransactions(req, res);
   } catch (error) {
@@ -12,7 +12,7 @@ router.get('/VRTransactions', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/GroupedTransactions', async (req: Request, res: Response) => {
+router.get('/GroupedTransactions', protect, async (req: Request, res: Response) => {
   try {
     await retrieveGroupedTransactions(req, res);
   } catch (error) {

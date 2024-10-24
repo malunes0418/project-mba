@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { errorResponse } from '../helpers/ApiResponseHelper';
 
 dotenv.config();
 
@@ -9,20 +10,22 @@ export interface JwtPayload {
   email: string;
 }
 
-export const protect = (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   let token = req.headers.authorization;
 
   if (!token || !token.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
+    res.status(401).json(errorResponse('No token, authorization denied'));
+    return;
   }
 
   token = token.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-    req.user = decoded;
+    // req.user = decoded;
     next();
-  } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
+  } catch (err) {
+    res.status(401).json(errorResponse('Token is not valid'));
+    return;
   }
 };
