@@ -101,6 +101,70 @@ export class BaseHelper {
               break;
           }
         }
+        if (reportType === 'CO_OCCURRENCE') {
+          switch (r.sortColumn) {
+            case 'item1':
+              r.sortColumn = 'item1';
+              break;
+            case 'item2':
+              r.sortColumn = 'item2';
+              break;
+            case 'frequency':
+              r.sortColumn = 'frequency';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
+
+        if (reportType === 'SUPPORT') {
+          switch (r.sortColumn) {
+            case 'T_ITEMDESCRIPTION':
+              r.sortColumn = 'T_ITEMDESCRIPTION';
+              break;
+            case 'support':
+              r.sortColumn = 'support';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
+
+        if (reportType === 'CONFIDENCE') {
+          switch (r.sortColumn) {
+            case 'item1':
+              r.sortColumn = 'item1';
+              break;
+            case 'item2':
+              r.sortColumn = 'item2';
+              break;
+            case 'confidence':
+              r.sortColumn = 'confidence';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
+
+        if (reportType === 'LIFT') {
+          switch (r.sortColumn) {
+            case 'item1':
+              r.sortColumn = 'item1';
+              break;
+            case 'item2':
+              r.sortColumn = 'item2';
+              break;
+            case 'lift':
+              r.sortColumn = 'lift';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
     
         // Append the sort column and sort type to the SQL query
         cmdStr += ` ORDER BY ${r.sortColumn}`;

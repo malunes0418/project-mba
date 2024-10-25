@@ -66,4 +66,98 @@ export class MBAManager {
     // Use the helper to retrieve and return the response
     return await BaseHelper.retrieveResponse(cmdStr);
   }
+
+  public async retrieveCoOccurrence(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT t1.T_ITEMDESCRIPTION AS item1, 
+             t2.T_ITEMDESCRIPTION AS item2, 
+             COUNT(*) AS frequency
+      FROM MBA.TRANSACTIONS t1
+      JOIN MBA.TRANSACTIONS t2 ON t1.T_INVOICENUMBER = t2.T_INVOICENUMBER
+      WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION
+      GROUP BY t1.T_ITEMDESCRIPTION, t2.T_ITEMDESCRIPTION
+      HAVING COUNT(*) > 1
+    `;
+
+    // Apply filters, sorting, and pagination
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2']);
+    }
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'frequency', 'CO_OCCURRENCE');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    // Use the helper to retrieve and return the response
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveSupport(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT T_ITEMDESCRIPTION, 
+             COUNT(DISTINCT T_INVOICENUMBER) / 
+             (SELECT COUNT(DISTINCT T_INVOICENUMBER) FROM MBA.TRANSACTIONS) AS support
+      FROM MBA.TRANSACTIONS
+      GROUP BY T_ITEMDESCRIPTION
+    `;
+
+    // Apply filters, sorting, and pagination
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['T_ITEMDESCRIPTION']);
+    }
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'support', 'SUPPORT');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    // Use the helper to retrieve and return the response
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveConfidence(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT t1.T_ITEMDESCRIPTION AS item1, 
+             t2.T_ITEMDESCRIPTION AS item2,
+             COUNT(DISTINCT t1.T_INVOICENUMBER) / 
+             (SELECT COUNT(DISTINCT T_INVOICENUMBER) FROM MBA.TRANSACTIONS t 
+              WHERE t.T_ITEMDESCRIPTION = t1.T_ITEMDESCRIPTION) AS confidence
+      FROM MBA.TRANSACTIONS t1
+      JOIN MBA.TRANSACTIONS t2 ON t1.T_INVOICENUMBER = t2.T_INVOICENUMBER
+      WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION
+      GROUP BY t1.T_ITEMDESCRIPTION, t2.T_ITEMDESCRIPTION
+    `;
+
+    // Apply filters, sorting, and pagination
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2']);
+    }
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'confidence', 'CONFIDENCE');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    // Use the helper to retrieve and return the response
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveLift(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT t1.T_ITEMDESCRIPTION AS item1, 
+             t2.T_ITEMDESCRIPTION AS item2,
+             (COUNT(DISTINCT t1.T_INVOICENUMBER) / 
+              (SELECT COUNT(DISTINCT T_INVOICENUMBER) FROM MBA.TRANSACTIONS)) /
+             ((SELECT COUNT(DISTINCT T_INVOICENUMBER) FROM MBA.TRANSACTIONS t 
+               WHERE t.T_ITEMDESCRIPTION = t1.T_ITEMDESCRIPTION) * 
+              (SELECT COUNT(DISTINCT T_INVOICENUMBER) FROM MBA.TRANSACTIONS t 
+               WHERE t.T_ITEMDESCRIPTION = t2.T_ITEMDESCRIPTION)) AS lift
+      FROM MBA.TRANSACTIONS t1
+      JOIN MBA.TRANSACTIONS t2 ON t1.T_INVOICENUMBER = t2.T_INVOICENUMBER
+      WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION
+      GROUP BY t1.T_ITEMDESCRIPTION, t2.T_ITEMDESCRIPTION
+    `;
+
+    // Apply filters, sorting, and pagination
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2']);
+    }
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'lift', 'LIFT');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    // Use the helper to retrieve and return the response
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
 }
