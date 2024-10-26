@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { retrieveConfidence, retrieveCoOccurrence, retrieveGroupedTransactions, retrieveLift, retrieveSupport, retrieveVRTransactions } from '../controllers/mbaController';
+import { retrieveConfidence, retrieveCoOccurrence, retrieveGroupedTransactions, retrieveLift, retrieveSalesPerMonth, retrieveSupport, retrieveVRTransactions } from '../controllers/mbaController';
 import { protect } from '../middleware/authMiddleware'; // Import the protect middleware
 
 const router = express.Router();
@@ -47,6 +47,14 @@ router.get('/Confidence', protect, async (req: Request, res: Response) => {
 router.get('/Lift', protect, async (req: Request, res: Response) => {
   try {
     await retrieveLift(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/SalesPerMonth', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveSalesPerMonth(req, res);
   } catch (error) {
     res.status(500).send(error);
   }

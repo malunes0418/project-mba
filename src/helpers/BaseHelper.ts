@@ -165,6 +165,17 @@ export class BaseHelper {
               break;
           }
         }
+
+        if (reportType === 'TOTALSALES') {
+          switch (r.sortColumn) {
+            case 'TotalSales':
+              r.sortColumn = 'TotalSales';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
     
         // Append the sort column and sort type to the SQL query
         cmdStr += ` ORDER BY ${r.sortColumn}`;
@@ -199,14 +210,19 @@ export class BaseHelper {
      * @param validFilters - An array of valid filter columns
      * @returns {string} - The modified SQL command string with filters applied
      */
-    static applyFilters(filter: string, cmdStr: string, validFilters: string[]): string {
+    static applyFilters(filter: string, cmdStr: string, validFilters: string[], filterValue: string[]): string {
       if (filter) {
         const filters = filter.split(':');
+
         filters.forEach((f) => {
-          const [key, value] = f.split('|');
-          if (validFilters.includes(key)) {
-            cmdStr += ` AND ${key} = "${value}"`;
-          }
+            const [key, value] = f.split('|');
+            const index = validFilters.indexOf(key);
+
+            // Only proceed if key is found in validFilters
+            if (index !== -1) {
+                const columnName = filterValue[index];
+                cmdStr += ` AND ${columnName} = "${value}"`;
+            }
         });
       }
       return cmdStr;
