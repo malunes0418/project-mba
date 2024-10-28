@@ -76,9 +76,7 @@ export class MBAManager {
              COUNT(*) AS frequency
       FROM MBA.TRANSACTIONS t1
       JOIN MBA.TRANSACTIONS t2 ON t1.T_INVOICENUMBER = t2.T_INVOICENUMBER
-      WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION
-      GROUP BY t1.T_ITEMDESCRIPTION, t2.T_ITEMDESCRIPTION
-      HAVING COUNT(*) > 1
+      WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION 
     `;
 
     // Apply filters, sorting, and pagination
