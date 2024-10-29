@@ -1,15 +1,10 @@
-import { Sequelize, QueryTypes } from 'sequelize'; // Import QueryTypes directly
-import sequelize from '../config/db'; // Your Sequelize instance
+import { Sequelize, QueryTypes } from 'sequelize'; 
+import sequelize from '../config/db'; 
 import { TransactionsRequest } from '../models/Transaction/transactionRequest';
 import { TransactionResponse } from '../models/Transaction/transactionResponse';
 import { BaseHelper } from '../helpers/BaseHelper';
 
 export class MBAManager {
-  /**
-   * Handles retrieving VR Transactions from the database.
-   * @param r - The transaction request object containing filters, sorting, pagination, etc.
-   * @returns {Promise<TransactionResponse>} - Returns the constructed response.
-   */
   public async retrieveVRTransactions(r: TransactionsRequest): Promise<TransactionResponse> {
     let cmdStr = `
       SELECT vs.VS_REGION AS REGION, 
@@ -37,7 +32,7 @@ export class MBAManager {
       WHERE 1=1
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['vs.VS_INVOICENUMBER', 'vs.VS_CUSTOMER', 'vs.VS_SALESPERSON', 'vs.VS_ITEMNUMBER'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['invoiceNumber', 'customer', 'salesPerson', 'itemNumber'], filterValue);
@@ -45,7 +40,7 @@ export class MBAManager {
     cmdStr = BaseHelper.determineSort(r, cmdStr, 'CUSTOMER', 'VITARICH_SALES');
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
@@ -56,7 +51,7 @@ export class MBAManager {
       FROM MBA.TRANSACTIONS t 
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['t.T_INVOICENUMBER'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['invoiceNumber'], filterValue);
@@ -65,7 +60,7 @@ export class MBAManager {
     cmdStr = BaseHelper.determineSort(r, cmdStr, 'INVOICENUMBER', 'GROUPED_TRANSACTIONS');
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
@@ -79,7 +74,7 @@ export class MBAManager {
       WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION 
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['t1.T_ITEMDESCRIPTION', 't2.T_ITEMDESCRIPTION'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2'], filterValue);
@@ -88,7 +83,7 @@ export class MBAManager {
     cmdStr = BaseHelper.determineSort(r, cmdStr, 'frequency', 'CO_OCCURRENCE');
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
@@ -100,7 +95,7 @@ export class MBAManager {
       FROM MBA.TRANSACTIONS 
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['T_ITEMDESCRIPTION'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['itemName'], filterValue);
@@ -109,7 +104,7 @@ export class MBAManager {
     cmdStr = BaseHelper.determineSort(r, cmdStr, 'support', 'SUPPORT');
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
@@ -125,7 +120,7 @@ export class MBAManager {
       WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION 
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['t1.T_ITEMDESCRIPTION', 't2.T_ITEMDESCRIPTION'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2'], filterValue);
@@ -134,7 +129,7 @@ export class MBAManager {
     cmdStr = BaseHelper.determineSort(r, cmdStr, 'confidence', 'CONFIDENCE');
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
@@ -153,7 +148,7 @@ export class MBAManager {
       WHERE t1.T_ITEMDESCRIPTION < t2.T_ITEMDESCRIPTION 
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['t1.T_ITEMDESCRIPTION', 't2.T_ITEMDESCRIPTION'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2'], filterValue);
@@ -162,7 +157,7 @@ export class MBAManager {
     cmdStr = BaseHelper.determineSort(r, cmdStr, 'lift', 'LIFT');
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
@@ -178,17 +173,17 @@ export class MBAManager {
           AND VS_GLMONTH IS NOT NULL 
     `;
 
-    // Apply filters, sorting, and pagination
+    
     const filterValue = ['MONTH'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['MONTH'], filterValue);
     }
-    // cmdStr = BaseHelper.determineSort(r, cmdStr, 'TotalSales', 'TOTALSALES');
+    
     cmdStr += ' GROUP BY MONTH ';
     cmdStr += ` ORDER BY STR_TO_DATE(CONCAT('01-', VS_GLMONTH), '%d-%y-%b')`;
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    // Use the helper to retrieve and return the response
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 }

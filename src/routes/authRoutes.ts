@@ -3,7 +3,6 @@ import { signup, login } from '../controllers/authController';
 
 const router = express.Router();
 
-// Auth routes
 router.post('/signup', async (req: Request, res: Response) => {
   try {
     await signup(req, res);

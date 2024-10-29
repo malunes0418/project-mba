@@ -1,17 +1,9 @@
 import { QueryTypes } from 'sequelize';
-import sequelize from '../config/db'; // Assuming this is your Sequelize instance
+import sequelize from '../config/db'; 
 import { TransactionResponse } from '../models/Transaction/transactionResponse';
 import { TransactionsRequest } from '../models/Transaction/transactionRequest';
 
 export class BaseHelper {
-    /**
-     * Helper method to determine the sort order of an SQL query.
-     * @param r - The request object containing sorting information
-     * @param cmdStr - The base SQL command string
-     * @param defaultSort - The default column to sort by
-     * @param tableName - The table name for the query
-     * @returns {string} - The modified SQL command string with sorting applied
-     */
     static determineSort(
         r: TransactionsRequest,
         cmdStr: string,
@@ -84,7 +76,7 @@ export class BaseHelper {
               r.sortColumn = 'GLMONTH';
               break;
             default:
-              r.sortColumn = defaultColumn; // Default to CUSTOMER if no valid sortColumn
+              r.sortColumn = defaultColumn; 
               break;
           }
         }
@@ -177,22 +169,16 @@ export class BaseHelper {
           }
         }
     
-        // Append the sort column and sort type to the SQL query
+        
         cmdStr += ` ORDER BY ${r.sortColumn}`;
         cmdStr += r.sortType === 'ASC' ? ' ASC' : ' DESC';
     
         return cmdStr;
       }
-  
-    /**
-     * Helper method to handle pagination in SQL queries.
-     * @param page - The current page number
-     * @param limit - The number of rows per page
-     * @returns {string} - The LIMIT clause for SQL
-     */
+
     static applyPagination(page?: string, limit?: string): string {
       let pageNumber = 0;
-      let limitNumber = 10; // Default limit
+      let limitNumber = 10; 
   
       if (page && limit) {
         pageNumber = parseInt(page) - 1;
@@ -202,14 +188,7 @@ export class BaseHelper {
   
       return ` LIMIT ${pageNumber}, ${limitNumber}`;
     }
-  
-    /**
-     * Helper method to apply filters based on the request query.
-     * @param filter - A string containing filter parameters
-     * @param cmdStr - The base SQL command string
-     * @param validFilters - An array of valid filter columns
-     * @returns {string} - The modified SQL command string with filters applied
-     */
+
     static applyFilters(filter: string, cmdStr: string, validFilters: string[], filterValue: string[]): string {
       if (filter) {
         const filters = filter.split(':');
@@ -218,7 +197,7 @@ export class BaseHelper {
             const [key, value] = f.split('|');
             const index = validFilters.indexOf(key);
 
-            // Only proceed if key is found in validFilters
+            
             if (index !== -1) {
                 const columnName = filterValue[index];
                 cmdStr += ` AND ${columnName} = "${value}"`;
@@ -227,17 +206,12 @@ export class BaseHelper {
       }
       return cmdStr;
     }
-    /**
-   * Retrieves data from the database and returns it in a TransactionResponse structure.
-   * @param query - The SQL query to execute
-   * @param connStr - Optional connection string (not needed when using Sequelize)
-   * @returns {Promise<TransactionResponse>} - The response containing the data or an error message
-   */
+
     static async retrieveResponse(query: string): Promise<any> {
       const resp = new TransactionResponse();
   
       try {
-        // Execute the query and retrieve data
+        
         const contents = await sequelize.query(query, { type: QueryTypes.SELECT });
   
         resp.isSuccess = true;
@@ -246,7 +220,7 @@ export class BaseHelper {
   
         let total = 0;
   
-        // Check for "ORDER BY" and "LIMIT *" and calculate the total count
+        
         const text = 'LIMIT *';
         const pattern = new RegExp(text.replace(/\*/g, '.*').replace(/\?/g, '.'), 'i');
         const match = pattern.exec(query);
