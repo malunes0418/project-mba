@@ -28,3 +28,29 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     return res.status(400).json(response);
   }
 };
+
+export const forgotPassword = async (req: Request, res: Response): Promise<Response> => {
+  const { email } = req.body;
+
+  
+  const response = await manager.forgotPassword(email);
+
+  if (response.isSuccess) {
+    return res.status(200).json(response);
+  } else {
+    return res.status(400).json(response);
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<Response> => {
+  const { token, password } = req.body;
+
+  
+  const response = await manager.resetPassword(token, password);
+
+  if (response.isSuccess) {
+    return res.status(200).json(response);
+  } else {
+    return res.status(400).json(response);
+  }
+};

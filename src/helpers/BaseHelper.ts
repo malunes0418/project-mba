@@ -10,6 +10,7 @@ export class BaseHelper {
         defaultColumn: string,
         reportType: string
       ): string {
+        // #region OLD DATA
         if (reportType === 'VITARICH_SALES') {
           switch (r.sortColumn) {
             case 'REGION':
@@ -93,7 +94,7 @@ export class BaseHelper {
               break;
           }
         }
-        if (reportType === 'CO_OCCURRENCE') {
+        if (reportType === 'CO_OCCURRENCE') { //can be reused for the new data
           switch (r.sortColumn) {
             case 'item1':
               r.sortColumn = 'item1';
@@ -168,14 +169,91 @@ export class BaseHelper {
               break;
           }
         }
-    
+        // #endregion
+
+        // #region NEW DATA
+        if (reportType === 'VITARICH_SALES_2024') {
+          switch (r.sortColumn) {
+            case 'GLDATE':
+              r.sortColumn = 'GLDATE';
+              break;
+            case 'ORDERNUMBER':
+              r.sortColumn = 'ORDERNUMBER';
+              break;
+            case 'DRNUMBER':
+              r.sortColumn = 'DRNUMBER';
+              break;
+            case 'ITEMNUMBER':
+              r.sortColumn = 'ITEMNUMBER';
+              break;
+            case 'LINQEQTY':
+              r.sortColumn = 'LINQEQTY';
+              break;
+            case 'UNITWEIGHT':
+              r.sortColumn = 'UNITWEIGHT';
+              break;
+            case 'AT50KG':
+              r.sortColumn = 'AT50KG';
+              break;
+            case 'UOM':
+              r.sortColumn = 'UOM';
+              break;
+            case 'UNITSELLINGPRICE':
+              r.sortColumn = 'UNITSELLINGPRICE';
+              break;
+            case 'DISCOUNT':
+              r.sortColumn = 'DISCOUNT';
+              break;
+            case 'LINEAMOUNT':
+              r.sortColumn = 'LINEAMOUNT';
+              break;
+            case 'EXTENDEDAMOUNT':
+              r.sortColumn = 'EXTENDEDAMOUNT';
+              break;
+            case 'REVENUEAMOUNT':
+              r.sortColumn = 'REVENUEAMOUNT';
+              break;
+            default:
+              r.sortColumn = defaultColumn; 
+              break;
+          }
+        }
+
+        if (reportType === 'GROUPED_TRANSACTIONS_2024') {
+          switch (r.sortColumn) {
+            case 'ORDERNUMBER':
+              r.sortColumn = 'ORDERNUMBER';
+              break;
+            case 'ITEMS':
+              r.sortColumn = 'ITEMS';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
+
+        if (reportType === 'SUPPORT_2024') {
+          switch (r.sortColumn) {
+            case 'DESCRIPTION':
+              r.sortColumn = 'DESCRIPTION';
+              break;
+            case 'support':
+              r.sortColumn = 'support';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
+        // #endregion
         
         cmdStr += ` ORDER BY ${r.sortColumn}`;
         cmdStr += r.sortType === 'ASC' ? ' ASC' : ' DESC';
     
         return cmdStr;
       }
-
+  
     static applyPagination(page?: string, limit?: string): string {
       let pageNumber = 0;
       let limitNumber = 10; 

@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
-import { retrieveConfidence, retrieveCoOccurrence, retrieveGroupedTransactions, retrieveLift, retrieveSalesPerMonth, retrieveSupport, retrieveVRTransactions } from '../controllers/mbaController';
-import { protect } from '../middleware/authMiddleware'; // Import the protect middleware
+import { retrieveConfidence, retrieveConfidence2024, retrieveCoOccurrence, retrieveCoOccurrence2024, retrieveGroupedTransactions, retrieveGroupedTransactions2024, retrieveLift, retrieveLift2024, retrieveSalesPerMonth, retrieveSalesPerMonth2024, retrieveSupport, retrieveSupport2024, retrieveVitarichTransactions2024, retrieveVRTransactions } from '../controllers/mbaController';
+import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
+// #region OLD DATA
 router.get('/VRTransactions', protect, async (req: Request, res: Response) => {
   try {
     await retrieveVRTransactions(req, res);
@@ -59,5 +60,63 @@ router.get('/SalesPerMonth', protect, async (req: Request, res: Response) => {
     res.status(500).send(error);
   }
 });
+// #endregion
+// #region NEW DATA
+router.get('/VitarichTransactions2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveVitarichTransactions2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/GroupedTransactions2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveGroupedTransactions2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/CoOccurrence2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveCoOccurrence2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/Support2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveSupport2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/Confidence2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveConfidence2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/Lift2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveLift2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/SalesPerMonth2024', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveSalesPerMonth2024(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+// #endregion
 
 export default router;

@@ -5,6 +5,7 @@ import { TransactionResponse } from '../models/Transaction/transactionResponse';
 import { BaseHelper } from '../helpers/BaseHelper';
 
 export class MBAManager {
+  // #region Old DATA
   public async retrieveVRTransactions(r: TransactionsRequest): Promise<TransactionResponse> {
     let cmdStr = `
       SELECT vs.VS_REGION AS REGION, 
@@ -186,4 +187,183 @@ export class MBAManager {
     
     return await BaseHelper.retrieveResponse(cmdStr);
   }
+  // #endregion
+  // #region New DATA
+  public async retrieveVitarichTransactions2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT vs.GLDATE AS GLDATE, 
+             vs.ORDERNUMBER AS ORDERNUMBER, 
+             vs.DRNUMBER AS DRNUMBER, 
+             vs.ITEMNUMBER AS ITEMNUMBER, 
+             vs.DESCRIPTION AS DESCRIPTION, 
+             vs.LINEQTY AS LINEQTY, 
+             vs.UNITWEIGHT AS UNITWEIGHT, 
+             vs.AT50KG AS AT50KG, 
+             vs.UOM AS UOM, 
+             vs.UNITSELLINGPRICE AS UNITSELLINGPRICE, 
+             vs.DISCOUNT AS DISCOUNT, 
+             vs.LINEAMOUNT AS LINEAMOUNT, 
+             vs.EXTENDEDAMOUNT AS EXTENDEDAMOUNT, 
+             vs.REVENUEAMOUNT AS REVENUEAMOUNT
+      FROM MBA.VITARICH_SALES_2024 vs
+      WHERE 1=1
+    `;
+
+    
+    const filterValue = ['vs.ORDERNUMBER', 'vs.ITEMNUMBER', 'vs.GLDATE'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['orderNumber', 'itemNumber', 'glDate'], filterValue);
+    }
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'GLDATE', 'VITARICH_SALES_2024');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveGroupedTransactions2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT ORDERNUMBER AS ORDERNUMBER, 
+             GROUP_CONCAT(DESCRIPTION) AS ITEMS
+      FROM MBA.VITARICH_SALES_2024
+      WHERE ORDERNUMBER != '0'
+    `;
+
+    
+    const filterValue = ['ORDERNUMBER'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['orderNumber'], filterValue);
+    }
+    cmdStr += ' GROUP BY ORDERNUMBER ';
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'ORDERNUMBER', 'GROUPED_TRANSACTIONS_2024');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveCoOccurrence2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT t1.DESCRIPTION AS item1, 
+             t2.DESCRIPTION AS item2, 
+             COUNT(*) AS frequency
+      FROM MBA.VITARICH_SALES_2024 t1
+      JOIN MBA.VITARICH_SALES_2024 t2 ON t1.ORDERNUMBER = t2.ORDERNUMBER
+      WHERE t1.DESCRIPTION < t2.DESCRIPTION 
+    `;
+
+    
+    const filterValue = ['t1.DESCRIPTION', 't2.DESCRIPTION'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2'], filterValue);
+    }
+    cmdStr += 'GROUP BY t1.DESCRIPTION, t2.DESCRIPTION HAVING COUNT(*) > 1'
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'frequency', 'CO_OCCURRENCE');// reused old sorting
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveSupport2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT DESCRIPTION, 
+             COUNT(DISTINCT ORDERNUMBER) / 
+             (SELECT COUNT(DISTINCT ORDERNUMBER) FROM MBA.VITARICH_SALES_2024) AS support
+      FROM MBA.VITARICH_SALES_2024 
+      WHERE ORDERNUMBER != '0'
+    `;
+
+    
+    const filterValue = ['DESCRIPTION'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['itemName'], filterValue);
+    }
+    cmdStr += ' GROUP BY DESCRIPTION ';
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'support', 'SUPPORT_2024');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveConfidence2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT t1.DESCRIPTION AS item1, 
+             t2.DESCRIPTION AS item2,
+             COUNT(DISTINCT t1.ORDERNUMBER) / 
+             (SELECT COUNT(DISTINCT ORDERNUMBER) FROM MBA.VITARICH_SALES_2024 t 
+              WHERE t.DESCRIPTION = t1.DESCRIPTION) AS confidence
+      FROM MBA.VITARICH_SALES_2024 t1
+      JOIN MBA.VITARICH_SALES_2024 t2 ON t1.ORDERNUMBER = t2.ORDERNUMBER
+      WHERE t1.DESCRIPTION < t2.DESCRIPTION AND t1.ORDERNUMBER != '0'
+    `;
+
+    
+    const filterValue = ['t1.DESCRIPTION', 't2.DESCRIPTION'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2'], filterValue);
+    }
+    cmdStr += ' GROUP BY t1.DESCRIPTION, t2.DESCRIPTION ';
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'confidence', 'CONFIDENCE');// reused old sorting  
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveLift2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT t1.DESCRIPTION AS item1, 
+             t2.DESCRIPTION AS item2,
+             (COUNT(DISTINCT t1.ORDERNUMBER) / 
+              (SELECT COUNT(DISTINCT ORDERNUMBER) FROM MBA.VITARICH_SALES_2024)) /
+             ((SELECT COUNT(DISTINCT ORDERNUMBER) FROM MBA.VITARICH_SALES_2024 t 
+               WHERE t.DESCRIPTION = t1.DESCRIPTION) * 
+              (SELECT COUNT(DISTINCT ORDERNUMBER) FROM MBA.VITARICH_SALES_2024 t 
+               WHERE t.DESCRIPTION = t2.DESCRIPTION)) AS lift
+      FROM MBA.VITARICH_SALES_2024 t1
+      JOIN MBA.VITARICH_SALES_2024 t2 ON t1.ORDERNUMBER = t2.ORDERNUMBER
+      WHERE t1.DESCRIPTION < t2.DESCRIPTION AND t1.ORDERNUMBER != '0'
+    `;
+
+    
+    const filterValue = ['t1.DESCRIPTION', 't2.DESCRIPTION'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['item1', 'item2'], filterValue);
+    }
+    cmdStr += ' GROUP BY t1.DESCRIPTION, t2.DESCRIPTION ';
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'lift', 'LIFT');// reused old sorting
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveSalesPerMonth2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT 
+          MONTH,
+          LINEQTY,
+          AT50KG,
+          EXTENDEDAMOUNT AS TotalSales
+      FROM 
+          VITARICH_SUMMARY
+    `;
+
+    
+    const filterValue = ['MONTH', 'LINEQTY', 'AT50KG'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['MONTH', 'LINEQTY', 'AT50KG'], filterValue);
+    }
+    
+    cmdStr += ' GROUP BY MONTH ';
+    cmdStr += ` ORDER BY FIELD(MONTH, 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')`;
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  // #endregion
 }

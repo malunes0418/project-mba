@@ -6,6 +6,8 @@ interface UserAttributes {
   name: string;
   email: string;
   password: string;
+  resetToken: string | null;
+  resetTokenExpires: Date | null;
 }
 
 class User extends Model<UserAttributes> implements UserAttributes {
@@ -13,6 +15,10 @@ class User extends Model<UserAttributes> implements UserAttributes {
   public name!: string;
   public email!: string;
   public password!: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+  public resetToken!: string | null;
+  public resetTokenExpires!: Date | null;
 }
 
 User.init(
@@ -34,6 +40,12 @@ User.init(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    resetToken: {
+      type: DataTypes.STRING,
+    },
+    resetTokenExpires: {
+      type: DataTypes.DATE,
     },
   },
   {
