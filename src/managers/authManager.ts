@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import User from '../models/User/userModel';
+import User from '../models/DB Models/userModel';
 import { successResponse, errorResponse } from '../helpers/ApiResponseHelper';
 import crypto from 'crypto';
 import { sendEmail } from '../utils/sendEmail';
@@ -22,7 +22,7 @@ export class authManager {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       
-      const newUser = await User.create({ name, email, password: hashedPassword });
+      const newUser = await User.create({ name, email, password: hashedPassword, createdAt: new Date(), updatedAt: new Date() });
 
       
       const token = jwt.sign({ id: newUser.id, email }, process.env.JWT_SECRET as string, { expiresIn: process.env.EXPIRES });

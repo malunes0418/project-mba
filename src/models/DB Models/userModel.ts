@@ -6,6 +6,8 @@ interface UserAttributes {
   name: string;
   email: string;
   password: string;
+  createdAt: Date;
+  updatedAt: Date;
   resetToken: string | null;
   resetTokenExpires: Date | null;
 }
@@ -41,6 +43,12 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+    },
     resetToken: {
       type: DataTypes.STRING,
     },
@@ -51,6 +59,7 @@ User.init(
   {
     sequelize,
     tableName: 'users',
+    timestamps: false
   }
 );
 
