@@ -165,28 +165,42 @@ export class MBAManager {
   public async retrieveSalesPerMonth(r: TransactionsRequest): Promise<TransactionResponse> {
     let cmdStr = `
       SELECT 
-          MONTHNAME(STR_TO_DATE(CONCAT('01-', VS_GLMONTH), '%d-%y-%b')) AS MONTH,
-          SUM(CAST(REPLACE(VS_LINEAMOUNT, ',', '') AS DECIMAL(15, 2))) AS TotalSales
+          CASE SUBSTRING(VS_GLMONTH, 4, 3)
+              WHEN 'Jan' THEN 'January'
+              WHEN 'Feb' THEN 'February'
+              WHEN 'Mar' THEN 'March'
+              WHEN 'Apr' THEN 'April'
+              WHEN 'May' THEN 'May'
+              WHEN 'Jun' THEN 'June'
+              WHEN 'Jul' THEN 'July'
+              WHEN 'Aug' THEN 'August'
+              WHEN 'Sep' THEN 'September'
+              WHEN 'Oct' THEN 'October'
+              WHEN 'Nov' THEN 'November'
+              WHEN 'Dec' THEN 'December'
+          END AS MONTH,
+          SUM(CASE WHEN CAST(VS_LINEQTY AS SIGNED) >= 0 THEN CAST(VS_LINEQTY AS SIGNED) ELSE 0 END) AS LINEQTY,
+          SUM(CASE WHEN CAST(VS_AT50KG AS SIGNED) >= 0 THEN CAST(VS_AT50KG AS SIGNED) ELSE 0 END) AS AT50KG,
+          SUM(CASE WHEN CAST(REPLACE(VS_EXTENDEDAMOUNT, ',', '') AS DECIMAL(15, 2)) >= 0 THEN CAST(REPLACE(VS_EXTENDEDAMOUNT, ',', '') AS DECIMAL(15, 2)) ELSE 0 END) AS TotalSales
       FROM 
           VITARICH_SALES
       WHERE 
-          VS_LINEAMOUNT NOT LIKE '-%'
-          AND VS_GLMONTH IS NOT NULL 
+          CAST(REPLACE(VS_EXTENDEDAMOUNT, ',', '') AS DECIMAL(15, 2)) >= 0
+          AND VS_GLMONTH IS NOT NULL
     `;
 
-    
     const filterValue = ['MONTH'];
     if (r.filter) {
       cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['MONTH'], filterValue);
     }
-    
+
     cmdStr += ' GROUP BY MONTH ';
-    cmdStr += ` ORDER BY STR_TO_DATE(CONCAT('01-', VS_GLMONTH), '%d-%y-%b')`;
+    cmdStr += ` ORDER BY FIELD(MONTH, 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')`;
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
-    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
+
   // #endregion
   // #region New DATA
   public async retrieveVitarichTransactions2024(r: TransactionsRequest): Promise<TransactionResponse> {
@@ -422,6 +436,30 @@ export class MBAManager {
     // cmdStr += ` ORDER BY pair_count DESC `;
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrieveSalesPerWeek2024(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+      SELECT 
+          YEAR(GLDATE) AS YEAR,
+          WEEK(GLDATE, 1) AS WEEK,
+          SUM(REVENUEAMOUNT) AS weekly_sales
+      FROM 
+          VITARICH_SALES_2024
+    `;
+
+    
+    const filterValue = ['MONTH', 'LINEQTY', 'AT50KG'];
+    if (r.filter) {
+      cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['MONTH', 'LINEQTY', 'AT50KG'], filterValue);
+    }
+    
+    cmdStr += ' GROUP BY YEAR, WEEK ';
+    cmdStr += ` ORDER BY YEAR, WEEK `;
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
