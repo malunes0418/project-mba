@@ -386,10 +386,8 @@ export class MBAManager {
             p.Item_B, desc_b.DESCRIPTION AS Description_B, 
             p.frequency AS pair_count,
             a.support_count AS support_A,
-            b.support_count AS support_B,
             (p.frequency / a.support_count) AS confidence_A_to_B,
-            (p.frequency / b.support_count) AS confidence_B_to_A,
-            (p.frequency / (a.support_count * b.support_count)) AS lift
+            (p.frequency * t.total_transactions / (a.support_count * b.support_count)) AS lift
         FROM (
             SELECT 
                 a.ITEMNUMBER AS Item_A, 
@@ -418,7 +416,6 @@ export class MBAManager {
         JOIN (
             SELECT 
                 ITEMNUMBER, 
-                DESCRIPTION,
                 COUNT(DISTINCT ORDERNUMBER) AS support_count
             FROM 
                 VITARICH_SALES_2024
@@ -427,13 +424,15 @@ export class MBAManager {
         ) b ON p.Item_B = b.ITEMNUMBER
         JOIN VITARICH_SALES_2024 desc_a ON p.Item_A = desc_a.ITEMNUMBER
         JOIN VITARICH_SALES_2024 desc_b ON p.Item_B = desc_b.ITEMNUMBER
+        CROSS JOIN (
+            SELECT COUNT(DISTINCT ORDERNUMBER) AS total_transactions FROM VITARICH_SALES_2024
+        ) t
     `;
 
     if (r.filter) {
         cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['Item_A', 'Item_B'], ['Item_A', 'Item_B']);
     }
     
-    // cmdStr += ` ORDER BY pair_count DESC `;
     cmdStr += BaseHelper.applyPagination(r.page, r.limit);
 
     return await BaseHelper.retrieveResponse(cmdStr);
