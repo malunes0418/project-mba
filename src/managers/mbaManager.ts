@@ -438,6 +438,65 @@ export class MBAManager {
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
+  public async retrieveItemPairAnalysisSort(r: TransactionsRequest): Promise<TransactionResponse> {
+    let cmdStr = `
+        SELECT 
+            p.Item_A, desc_a.DESCRIPTION AS Description_A, 
+            p.Item_B, desc_b.DESCRIPTION AS Description_B, 
+            p.frequency AS pair_count,
+            a.support_count AS support_A,
+            (p.frequency / a.support_count) AS confidence_A_to_B,
+            (p.frequency * t.total_transactions / (a.support_count * b.support_count)) AS lift
+        FROM (
+            SELECT 
+                a.ITEMNUMBER AS Item_A, 
+                b.ITEMNUMBER AS Item_B, 
+                COUNT(*) AS frequency
+            FROM 
+                VITARICH_SALES_2024 a
+            JOIN 
+                VITARICH_SALES_2024 b
+            ON 
+                a.ORDERNUMBER = b.ORDERNUMBER
+                AND a.ITEMNUMBER < b.ITEMNUMBER
+            GROUP BY 
+                a.ITEMNUMBER, b.ITEMNUMBER
+        ) p
+        JOIN (
+            SELECT 
+                ITEMNUMBER, 
+                DESCRIPTION,
+                COUNT(DISTINCT ORDERNUMBER) AS support_count
+            FROM 
+                VITARICH_SALES_2024
+            GROUP BY 
+                ITEMNUMBER
+        ) a ON p.Item_A = a.ITEMNUMBER
+        JOIN (
+            SELECT 
+                ITEMNUMBER, 
+                COUNT(DISTINCT ORDERNUMBER) AS support_count
+            FROM 
+                VITARICH_SALES_2024
+            GROUP BY 
+                ITEMNUMBER
+        ) b ON p.Item_B = b.ITEMNUMBER
+        JOIN VITARICH_SALES_2024 desc_a ON p.Item_A = desc_a.ITEMNUMBER
+        JOIN VITARICH_SALES_2024 desc_b ON p.Item_B = desc_b.ITEMNUMBER
+        CROSS JOIN (
+            SELECT COUNT(DISTINCT ORDERNUMBER) AS total_transactions FROM VITARICH_SALES_2024
+        ) t
+    `;
+
+    if (r.filter) {
+        cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['Item_A', 'Item_B'], ['Item_A', 'Item_B']);
+    }
+    
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
   public async retrieveSalesPerWeek2024(r: TransactionsRequest): Promise<TransactionResponse> {
     let cmdStr = `
       SELECT 

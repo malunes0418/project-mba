@@ -215,6 +215,20 @@ export const retrieveItemPairAnalysis = async (req: Request, res: Response): Pro
   }
 };
 
+export const retrieveItemPairAnalysisSort = async (req: Request, res: Response): Promise<Response> => {
+  const manager = new MBAManager();
+  const requestQuery: TransactionsRequest = req.query;
+
+  
+  const response = await manager.retrieveItemPairAnalysisSort(requestQuery);
+
+  if (response.isSuccess) {
+    return res.status(200).json(response);
+  } else {
+    return res.status(500).json({ isSuccess: false, message: response.message });
+  }
+};
+
 export const retrieveSalesPerWeek2024 = async (req: Request, res: Response): Promise<Response> => {
   const manager = new MBAManager();
   const requestQuery: TransactionsRequest = req.query;

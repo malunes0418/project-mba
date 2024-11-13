@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { retrieveConfidence, retrieveConfidence2024, retrieveCoOccurrence, retrieveCoOccurrence2024, retrieveGroupedTransactions, retrieveGroupedTransactions2024, retrieveItemPairAnalysis, retrieveLift, retrieveLift2024, retrieveSalesPerMonth, retrieveSalesPerMonth2024, retrieveSupport, retrieveSupport2024, retrieveVitarichTransactions2024, retrieveVRTransactions, retrieveSalesPerWeek2024 } from '../controllers/mbaController';
+import { retrieveConfidence, retrieveConfidence2024, retrieveCoOccurrence, retrieveCoOccurrence2024, retrieveGroupedTransactions, retrieveGroupedTransactions2024, retrieveItemPairAnalysis, retrieveLift, retrieveLift2024, retrieveSalesPerMonth, retrieveSalesPerMonth2024, retrieveSupport, retrieveSupport2024, retrieveVitarichTransactions2024, retrieveVRTransactions, retrieveSalesPerWeek2024, retrieveItemPairAnalysisSort } from '../controllers/mbaController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -121,6 +121,14 @@ router.get('/SalesPerMonth2024', protect, async (req: Request, res: Response) =>
 router.get('/ItemPairAnalysis', protect, async (req: Request, res: Response) => {
   try {
     await retrieveItemPairAnalysis(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/ItemPairAnalysisSort', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveItemPairAnalysisSort(req, res);
   } catch (error) {
     res.status(500).send(error);
   }
