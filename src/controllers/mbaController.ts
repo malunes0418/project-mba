@@ -242,4 +242,22 @@ export const retrieveSalesPerWeek2024 = async (req: Request, res: Response): Pro
     return res.status(500).json({ isSuccess: false, message: response.message });
   }
 };
+
+export const retrieveItemPairAnalysisFINAL = async (req: Request, res: Response): Promise<Response> => {
+  const manager = new MBAManager();
+  const requestQuery: TransactionsRequest = req.query;
+  const dataset = req.params.dataset;
+
+  if (!dataset || !['VT_DATASET_2024', 'VT_DATASET_2023'].includes(dataset)) {
+    return res.status(400).json({ isSuccess: false, message: 'Invalid dataset specified' });
+  }
+
+  const response = await manager.retrieveItemPairAnalysisFINAL(requestQuery, dataset);
+
+  if (response.isSuccess) {
+    return res.status(200).json(response);
+  } else {
+    return res.status(500).json({ isSuccess: false, message: response.message });
+  }
+};
 // #endregion

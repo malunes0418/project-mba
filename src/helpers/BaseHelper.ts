@@ -246,6 +246,20 @@ export class BaseHelper {
               break;
           }
         }
+
+        if (reportType === 'ItemPairAnalysisFINAL') {
+          switch (r.sortColumn) {
+            case 'pf.Item_A':
+              r.sortColumn = 'pf.Item_A';
+              break;
+            case 'pf.Item_B':
+              r.sortColumn = 'pf.Item_B';
+              break;
+            default:
+              r.sortColumn = defaultColumn;
+              break;
+          }
+        }
         // #endregion
         
         cmdStr += ` ORDER BY ${r.sortColumn}`;
