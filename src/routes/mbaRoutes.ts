@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { retrieveConfidence, retrieveConfidence2024, retrieveCoOccurrence, retrieveCoOccurrence2024, retrieveGroupedTransactions, retrieveGroupedTransactions2024, retrieveItemPairAnalysis, retrieveLift, retrieveLift2024, retrieveSalesPerMonth, retrieveSalesPerMonth2024, retrieveSupport, retrieveSupport2024, retrieveVitarichTransactions2024, retrieveVRTransactions, retrieveSalesPerWeek2024, retrieveItemPairAnalysisSort, retrieveItemPairAnalysisFINAL } from '../controllers/mbaController';
+import { retrieveConfidence, retrieveConfidence2024, retrieveCoOccurrence, retrieveCoOccurrence2024, retrieveGroupedTransactions, retrieveGroupedTransactions2024, retrieveItemPairAnalysis, retrieveLift, retrieveLift2024, retrieveSalesPerMonth, retrieveSalesPerMonth2024, retrieveSupport, retrieveSupport2024, retrieveVitarichTransactions2024, retrieveVRTransactions, retrieveSalesPerWeek2024, retrieveItemPairAnalysisSort, retrieveItemPairAnalysisFINAL, retrieveCombinedItemPairAnalysis, retrievePairCountItemPairAnalysis } from '../controllers/mbaController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -150,6 +150,21 @@ router.get('/ItemPairAnalysisFINAL/:dataset', protect, async (req: Request, res:
   }
 });
 
+router.get('/CombinedItemPairAnalysis', protect, async (req: Request, res: Response) => {
+  try {
+    await retrieveCombinedItemPairAnalysis(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.get('/PairCountItemPairAnalysis', protect, async (req: Request, res: Response) => {
+  try {
+    await retrievePairCountItemPairAnalysis(req, res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 // #endregion
 
 export default router;

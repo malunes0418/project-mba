@@ -260,4 +260,31 @@ export const retrieveItemPairAnalysisFINAL = async (req: Request, res: Response)
     return res.status(500).json({ isSuccess: false, message: response.message });
   }
 };
+
+export const retrieveCombinedItemPairAnalysis = async (req: Request, res: Response): Promise<Response> => {
+  const manager = new MBAManager();
+  const requestQuery: TransactionsRequest = req.query;
+
+  const response = await manager.retrieveCombinedItemPairAnalysis(requestQuery);
+
+  if (response.isSuccess) {
+    return res.status(200).json(response);
+  } else {
+    return res.status(500).json({ isSuccess: false, message: response.message });
+  }
+};
+
+export const retrievePairCountItemPairAnalysis = async (req: Request, res: Response): Promise<Response> => {
+  const manager = new MBAManager();
+  const requestQuery: TransactionsRequest = req.query;
+
+  const response = await manager.retrievePairCountItemPairAnalysis(requestQuery);
+
+  if (response.isSuccess) {
+    return res.status(200).json(response);
+  } else {
+    return res.status(500).json({ isSuccess: false, message: response.message });
+  }
+};
+
 // #endregion

@@ -575,5 +575,151 @@ export class MBAManager {
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
+  public async retrieveCombinedItemPairAnalysis(r: TransactionsRequest): Promise<TransactionResponse> {
+    const dataset2023 = 'VT_DATASET_2023';
+    const dataset2024 = 'VT_DATASET_2024';
+
+    let cmdStr = `
+        WITH CombinedDataset AS (
+            SELECT 
+                DESCRIPTION,
+                ORDERNUMBER,
+                '2023' AS year
+            FROM ${dataset2023}
+            UNION ALL
+            SELECT 
+                DESCRIPTION,
+                ORDERNUMBER,
+                '2024' AS year
+            FROM ${dataset2024}
+        ),
+        PairFrequency AS (
+            SELECT
+                a.DESCRIPTION AS Item_A,
+                b.DESCRIPTION AS Item_B,
+                COUNT(*) AS frequency,
+                a.year AS year
+            FROM
+                CombinedDataset a
+            JOIN
+                CombinedDataset b
+            ON
+                a.ORDERNUMBER = b.ORDERNUMBER
+                AND a.DESCRIPTION < b.DESCRIPTION
+                AND a.year = b.year
+            GROUP BY
+                a.DESCRIPTION, b.DESCRIPTION, a.year
+        ),
+        ItemSupport AS (
+            SELECT
+                DESCRIPTION AS Item,
+                COUNT(DISTINCT ORDERNUMBER) AS support_count,
+                year
+            FROM
+                CombinedDataset
+            GROUP BY
+                DESCRIPTION, year
+        ),
+        TotalTransactions AS (
+            SELECT COUNT(DISTINCT ORDERNUMBER) AS total_transactions, year
+            FROM CombinedDataset
+            GROUP BY year
+        )
+        SELECT 
+            pf.Item_A AS Description_A,
+            pf.Item_B AS Description_B,
+            pf.frequency AS pair_count,
+            ia.support_count AS support_A,
+            (pf.frequency / ia.support_count) AS confidence_A_to_B,
+            (pf.frequency * tt.total_transactions / (ia.support_count * ib.support_count)) AS lift,
+            pf.year
+        FROM
+            PairFrequency pf
+        JOIN ItemSupport ia ON pf.Item_A = ia.Item AND pf.year = ia.year
+        JOIN ItemSupport ib ON pf.Item_B = ib.Item AND pf.year = ib.year
+        JOIN TotalTransactions tt ON pf.year = tt.year
+    `;
+
+    if (r.filter) {
+        cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['Item_A', 'Item_B'], ['Item_A', 'Item_B']);
+    }
+
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'pf.year', 'CombinedItemPairAnalysis');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
+  public async retrievePairCountItemPairAnalysis(r: TransactionsRequest): Promise<TransactionResponse> {
+    const dataset2023 = 'VT_DATASET_2023';
+    const dataset2024 = 'VT_DATASET_2024';
+
+    let cmdStr = `
+        WITH CombinedDataset AS (
+            SELECT 
+                DESCRIPTION,
+                ORDERNUMBER,
+                '2023' AS year
+            FROM ${dataset2023}
+            UNION ALL
+            SELECT 
+                DESCRIPTION,
+                ORDERNUMBER,
+                '2024' AS year
+            FROM ${dataset2024}
+        ),
+        PairFrequency AS (
+            SELECT
+                a.DESCRIPTION AS Item_A,
+                b.DESCRIPTION AS Item_B,
+                COUNT(*) AS frequency,
+                a.year AS year
+            FROM
+                CombinedDataset a
+            JOIN
+                CombinedDataset b
+            ON
+                a.ORDERNUMBER = b.ORDERNUMBER
+                AND a.DESCRIPTION < b.DESCRIPTION
+                AND a.year = b.year
+            GROUP BY
+                a.DESCRIPTION, b.DESCRIPTION, a.year
+        ),
+        ItemSupport AS (
+            SELECT
+                DESCRIPTION AS Item,
+                COUNT(DISTINCT ORDERNUMBER) AS support_count,
+                year
+            FROM
+                CombinedDataset
+            GROUP BY
+                DESCRIPTION, year
+        ),
+        TotalTransactions AS (
+            SELECT COUNT(DISTINCT ORDERNUMBER) AS total_transactions, year
+            FROM CombinedDataset
+            GROUP BY year
+        )
+        SELECT 
+            pf.Item_A AS Description_A,
+            pf.Item_B AS Description_B,
+            pf.frequency AS pair_count
+        FROM
+            PairFrequency pf
+        JOIN ItemSupport ia ON pf.Item_A = ia.Item AND pf.year = ia.year
+        JOIN ItemSupport ib ON pf.Item_B = ib.Item AND pf.year = ib.year
+        JOIN TotalTransactions tt ON pf.year = tt.year
+    `;
+
+    if (r.filter) {
+        cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['Item_A', 'Item_B'], ['Item_A', 'Item_B']);
+    }
+
+    cmdStr = BaseHelper.determineSort(r, cmdStr, 'pf.Item_A', 'ItemPairAnalysisFINAL');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
   // #endregion
 }
