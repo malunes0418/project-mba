@@ -287,4 +287,17 @@ export const retrievePairCountItemPairAnalysis = async (req: Request, res: Respo
   }
 };
 
+export const retrieveProductCountAnalysis = async (req: Request, res: Response): Promise<Response> => {
+  const manager = new MBAManager();
+  const requestQuery: TransactionsRequest = req.query;
+
+  const response = await manager.retrieveProductCountAnalysis(requestQuery);
+
+  if (response.isSuccess) {
+      return res.status(200).json(response);
+  } else {
+      return res.status(500).json({ isSuccess: false, message: response.message });
+  }
+};
+
 // #endregion

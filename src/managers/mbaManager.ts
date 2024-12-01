@@ -721,5 +721,38 @@ export class MBAManager {
     return await BaseHelper.retrieveResponse(cmdStr);
   }
 
+  public async retrieveProductCountAnalysis(r: TransactionsRequest): Promise<TransactionResponse> {
+    const dataset2023 = 'VT_DATASET_2023';
+    const dataset2024 = 'VT_DATASET_2024';
+
+    let cmdStr = `
+        WITH CombinedDataset AS (
+            SELECT 
+                DESCRIPTION
+            FROM ${dataset2023}
+            UNION ALL
+            SELECT 
+                DESCRIPTION
+            FROM ${dataset2024}
+        )
+        SELECT 
+            DESCRIPTION AS product,
+            COUNT(*) AS count
+        FROM 
+            CombinedDataset
+        GROUP BY 
+            DESCRIPTION
+    `;
+
+    if (r.filter) {
+        cmdStr = BaseHelper.applyFilters(r.filter, cmdStr, ['DESCRIPTION'], ['DESCRIPTION']);
+    }
+
+    // cmdStr = BaseHelper.determineSort(r, cmdStr, 'DESCRIPTION', 'ProductCountAnalysis');
+    cmdStr += BaseHelper.applyPagination(r.page, r.limit);
+
+    return await BaseHelper.retrieveResponse(cmdStr);
+  }
+
   // #endregion
 }
