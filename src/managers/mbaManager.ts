@@ -555,14 +555,16 @@ export class MBAManager {
             pf.Item_A AS Description_A,
             pf.Item_B AS Description_B,
             pf.frequency AS pair_count,
-            ia.support_count AS support_A,
+            pf.frequency / tt.total_transactions AS support_A_to_B,
             (pf.frequency / ia.support_count) AS confidence_A_to_B,
             (pf.frequency * tt.total_transactions / (ia.support_count * ib.support_count)) AS lift
         FROM
             PairFrequency pf
         JOIN ItemSupport ia ON pf.Item_A = ia.Item
         JOIN ItemSupport ib ON pf.Item_B = ib.Item
-        CROSS JOIN TotalTransactions tt
+        CROSS JOIN TotalTransactions tt 
+        WHERE 
+            (pf.frequency * tt.total_transactions / (ia.support_count * ib.support_count)) <= 7 
     `;
 
     if (r.filter) {
